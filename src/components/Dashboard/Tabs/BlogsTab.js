@@ -100,7 +100,7 @@ const BlogsTab = () => {
             onEditorChange={(content) => console.log(content)}
             init={{
               height: 500,
-              menubar: false,
+              menubar: 'file edit insert view format table tools help',
               plugins: [
                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
