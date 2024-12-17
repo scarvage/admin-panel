@@ -113,7 +113,6 @@ const BlogsTab = () => {
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
             }}
           />
-          <button onClick={log}>Log editor content</button>
           <button 
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
