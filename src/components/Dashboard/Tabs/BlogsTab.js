@@ -177,7 +177,7 @@ const BlogsTab = () => {
             <p className="text-gray-500 mb-4">By {selectedBlog.author}</p>
             {selectedBlog.coverImage && (
               <img 
-                src={`http://localhost:3000${selectedBlog.coverImage}`} 
+                src={`https://backend-kve8.onrender.com${selectedBlog.coverImage}`} 
                 alt="Cover"   
                 className="w-full h-auto mb-4 rounded-lg" 
               />
