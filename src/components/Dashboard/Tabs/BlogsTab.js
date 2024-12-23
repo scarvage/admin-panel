@@ -12,6 +12,8 @@ const BlogsTab = () => {
   const [blogTitle, setBlogTitle] = useState('');
   const [blogAuthor, setBlogAuthor] = useState('');
   const [blogContent, setBlogContent] = useState('');
+  const [isPremium, setIsPremium] = useState(false);
+  const [coverImage, setCoverImage] = useState(null);
 
   useEffect(() => {
     fetchBlogs();
@@ -28,17 +30,23 @@ const BlogsTab = () => {
 
   const handleCreateBlog = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('title', blogTitle);
+    formData.append('author', blogAuthor);
+    formData.append('content', blogContent);
+    formData.append('premium', isPremium);
+    if (coverImage) formData.append('coverImage', coverImage);
+
     try {
-      await apiService.createBlog({
-        title: blogTitle,
-        author: blogAuthor,
-        content: blogContent
-      });
+      await apiService.createBlog(formData);
       fetchBlogs();
       // Reset form
       setBlogTitle('');
       setBlogAuthor('');
       setBlogContent('');
+      setIsPremium(false);
+      setCoverImage(null);
     } catch (error) {
       console.error('Error creating blog:', error);
     }
@@ -64,18 +72,15 @@ const BlogsTab = () => {
       console.error('Error fetching blog details:', error);
     }
   };
+
   const editorRef = useRef(null);
-  const log = () => {
-    if (editorRef.current) {
-      console.log(editorRef.current.getContent());
-    }
-  };
+
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* Create Blog */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Create Blog</h3>
-        <form onSubmit={handleCreateBlog} className="space-y-4">
+        <form onSubmit={handleCreateBlog} className="space-y-4" encType="multipart/form-data">
           <input 
             type="text" 
             placeholder="Title" 
@@ -92,32 +97,40 @@ const BlogsTab = () => {
             className="w-full p-2 border rounded" 
             required 
           />
-          
+          <div className="flex items-center space-x-2">
+            <input 
+              type="checkbox"
+              checked={isPremium}
+              onChange={(e) => setIsPremium(e.target.checked)}
+            />
+            <label>Premium Blog</label>
+          </div>
+          <input 
+            type="file" 
+            onChange={(e) => setCoverImage(e.target.files[0])}
+            className="w-full p-2 border rounded"
+            accept="image/*"
+            required
+          />
           <Editor
-            apiKey='fif605zvbtiis0tl08np06dgb9m4mh94057sgeimyrq4ee06'
+            apiKey="your-tinymce-api-key"
             value={blogContent}
-            onInit={(_evt, editor) => editorRef.current = editor}
-            onEditorChange={(content) => console.log(content)}
+            onEditorChange={(content) => setBlogContent(content)}
             init={{
               height: 500,
-              menubar: 'file edit insert view format table tools help',
               plugins: [
                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                 'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
               ],
-              toolbar: 'undo redo | blocks | ' +
-                'bold italic forecolor | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'removeformat | help',
-              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+              toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
             }}
           />
           <button 
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Create
+            Create Blog
           </button>
         </form>
       </div>
@@ -146,6 +159,7 @@ const BlogsTab = () => {
                 </div>
               </div>
               <p className="text-gray-500">By {blog.author}</p>
+              {blog.premium && <p className="text-yellow-600">Premium Blog</p>}
             </div>
           ))}
         </div>
@@ -161,9 +175,19 @@ const BlogsTab = () => {
           <div>
             <h4 className="text-xl font-medium mb-2">{selectedBlog.title}</h4>
             <p className="text-gray-500 mb-4">By {selectedBlog.author}</p>
+            {selectedBlog.coverImage && (
+              <img 
+                src={`http://localhost:3000${selectedBlog.coverImage}`} 
+                alt="Cover"   
+                className="w-full h-auto mb-4 rounded-lg" 
+              />
+            )}
+            <p className="text-gray-600 mb-4">
+              {selectedBlog.premium ? 'Premium Blog' : 'Free Blog'}
+            </p>
             <div 
               className="prose max-w-none" 
-              dangerouslySetInnerHTML={{__html: selectedBlog.content}}
+              dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
             />
           </div>
         )}

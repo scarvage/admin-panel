@@ -14,11 +14,14 @@ const ProductsTab = () => {
   // Add fund state
   const [selectedProductId, setSelectedProductId] = useState('');
   const [fundCompanyName, setFundCompanyName] = useState('');
+  const [fundCompanySuggestions, setFundCompanySuggestions] = useState([]);
+  const [selectedFundCompanyName, setSelectedFundCompanyName] = useState('');
   const [fundAllocationPercent, setFundAllocationPercent] = useState('');
   const [fundEntryPrice, setFundEntryPrice] = useState('');
 
   useEffect(() => {
     fetchProducts();
+    fetchCompanies();
   }, []);
 
   const fetchProducts = async () => {
@@ -30,15 +33,20 @@ const ProductsTab = () => {
     }
   };
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await apiService.getCompanies();
+      setFundCompanySuggestions(response.data);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
+  };
+
   const handleCreateProduct = async (e) => {
     e.preventDefault();
     try {
-      await apiService.createProduct({
-        name: productName,
-        description: productDescription
-      });
-      fetchProducts();
-      // Reset form
+      await apiService.createProduct({ name: productName, description: productDescription });
+      await fetchProducts();
       setProductName('');
       setProductDescription('');
     } catch (error) {
@@ -55,19 +63,35 @@ const ProductsTab = () => {
 
     try {
       await apiService.addFundToProduct(selectedProductId, {
-        companyName: fundCompanyName,
+        companyName: selectedFundCompanyName,
         allocationPercent: parseInt(fundAllocationPercent),
         entryPrice: parseFloat(fundEntryPrice)
       });
-      fetchProducts();
-      // Reset form
+      await fetchProducts();
       setSelectedProductId('');
       setFundCompanyName('');
+      setSelectedFundCompanyName('');
       setFundAllocationPercent('');
       setFundEntryPrice('');
     } catch (error) {
       console.error('Error adding fund:', error);
     }
+  };
+
+  const handleFundCompanyNameChange = (event) => {
+    const searchTerm = event.target.value;
+    setFundCompanyName(searchTerm);
+
+    const matchingCompanies = fundCompanySuggestions.filter((company) =>
+      company.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFundCompanySuggestions(matchingCompanies);
+  };
+
+  const selectFundCompany = (company) => {
+    setSelectedFundCompanyName(company);
+    setFundCompanyName(company);
+    setFundCompanySuggestions([]);
   };
 
   const viewProductDetails = async (id) => {
@@ -86,23 +110,23 @@ const ProductsTab = () => {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Create Product</h3>
         <form onSubmit={handleCreateProduct} className="space-y-4">
-          <input 
-            type="text" 
-            placeholder="Name" 
+          <input
+            type="text"
+            placeholder="Name"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            className="w-full p-2 border rounded" 
-            required 
+            className="w-full p-2 border rounded"
+            required
           />
-          <input 
-            type="text" 
-            placeholder="Description" 
+          <input
+            type="text"
+            placeholder="Description"
             value={productDescription}
             onChange={(e) => setProductDescription(e.target.value)}
-            className="w-full p-2 border rounded" 
-            required 
+            className="w-full p-2 border rounded"
+            required
           />
-          <button 
+          <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
@@ -115,44 +139,72 @@ const ProductsTab = () => {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Add Fund to Product</h3>
         <form onSubmit={handleAddFund} className="space-y-4">
-          <select 
+          <select
             value={selectedProductId}
             onChange={(e) => setSelectedProductId(e.target.value)}
             className="w-full p-2 border rounded"
             required
           >
             <option value="">Select Product</option>
-            {products.map(prod => (
+            {products.map((prod) => (
               <option key={prod._id} value={prod._id}>
                 {prod.name}
               </option>
             ))}
           </select>
-          <input 
-            type="text" 
-            placeholder="Company Name" 
-            value={fundCompanyName}
-            onChange={(e) => setFundCompanyName(e.target.value)}
-            className="w-full p-2 border rounded" 
-            required 
-          />
-          <input 
-            type="number" 
-            placeholder="Allocation Percent" 
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Company Name"
+              value={fundCompanyName}
+              onChange={handleFundCompanyNameChange}
+              className="w-full p-2 border rounded pr-8"
+              required
+            />
+            {fundCompanySuggestions.length > 0 && (
+              <div className="absolute bg-white border rounded shadow-lg z-10 w-full">
+                {fundCompanySuggestions.map((company, index) => (
+                  <div
+                    key={index}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => selectFundCompany(company)}
+                  >
+                    {company}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <select
+            value={selectedFundCompanyName}
+            onChange={(e) => setSelectedFundCompanyName(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="">Select Company</option>
+            {fundCompanySuggestions.map((company, index) => (
+              <option key={index} value={company}>
+                {company}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            placeholder="Allocation Percent"
             value={fundAllocationPercent}
             onChange={(e) => setFundAllocationPercent(e.target.value)}
-            className="w-full p-2 border rounded" 
-            required 
+            className="w-full p-2 border rounded"
+            required
           />
-          <input 
-            type="number" 
-            placeholder="Entry Price" 
+          <input
+            type="number"
+            placeholder="Entry Price"
             value={fundEntryPrice}
             onChange={(e) => setFundEntryPrice(e.target.value)}
-            className="w-full p-2 border rounded" 
-            required 
+            className="w-full p-2 border rounded"
+            required
           />
-          <button 
+          <button
             type="submit"
             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
           >
@@ -165,11 +217,11 @@ const ProductsTab = () => {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">All Products</h3>
         <div className="space-y-4">
-          {products.map(prod => (
+          {products.map((prod) => (
             <div key={prod._id} className="border p-4 rounded">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">{prod.name}</h4>
-                <button 
+                <button
                   onClick={() => viewProductDetails(prod._id)}
                   className="text-blue-600 hover:text-blue-800"
                 >
@@ -195,7 +247,7 @@ const ProductsTab = () => {
             <div className="space-y-4">
               <h5 className="font-medium">Funds:</h5>
               {selectedProduct.funds && selectedProduct.funds.length > 0 ? (
-                selectedProduct.funds.map(fund => (
+                selectedProduct.funds.map((fund) => (
                   <div key={fund._id} className="border p-4 rounded">
                     <p className="font-medium">{fund.name}</p>
                     <p>Price: ₹{fund.price}</p>

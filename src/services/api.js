@@ -5,6 +5,7 @@ const API_BASE = 'https://backend-kve8.onrender.com/api';
 export const apiService = {
   // Subscriptions
   getSubscriptions: () => axios.get(`${API_BASE}/subscriptions/`),
+  getCompanies: () => axios.get(`${API_BASE}/data/companies/`),
   getSubscriptionDetails: (id) => axios.get(`${API_BASE}/subscriptions/${id}`),
   createSubscription: (data) => axios.post(`${API_BASE}/subscriptions/create-subscription`, data),
   addProductToSubscription: (subscriptionId, productId) => 
