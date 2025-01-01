@@ -5,6 +5,7 @@ import Navbar from '../Layout/Navbar';
 import SubscriptionsTab from './Tabs/SubscriptionsTab';
 import ProductsTab from './Tabs/ProductsTab';
 import BlogsTab from './Tabs/BlogsTab';
+import TopMoversTab from './Tabs/TopMoversTab';
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
@@ -15,13 +16,15 @@ const Dashboard = () => {
   }
 
   const renderTab = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'subscriptions':
         return <SubscriptionsTab />;
       case 'products':
         return <ProductsTab />;
       case 'blogs':
         return <BlogsTab />;
+      case 'top-movers':
+        return <TopMoversTab />;
       default:
         return <SubscriptionsTab />;
     }
@@ -37,14 +40,15 @@ const Dashboard = () => {
             {[
               { key: 'subscriptions', label: 'Subscriptions' },
               { key: 'products', label: 'Products' },
-              { key: 'blogs', label: 'Blogs' }
+              { key: 'blogs', label: 'Blogs' },
+              { key: 'top-movers', label: 'Top Movers' }, // New Tab
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-3 py-2 border-b-2 font-medium text-sm ${
-                  activeTab === tab.key 
-                    ? 'border-blue-500 text-blue-600' 
+                  activeTab === tab.key
+                    ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500'
                 }`}
               >
