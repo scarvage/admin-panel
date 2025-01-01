@@ -40,16 +40,7 @@ const TopMoversTab = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold text-gray-800">Top Gainers and Losers</h1>
-        <button
-          onClick={refreshStocks}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          disabled={loading}
-        >
-          {loading ? 'Refreshing...' : 'Refresh Stocks'}
-        </button>
-      </div>
+      
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
