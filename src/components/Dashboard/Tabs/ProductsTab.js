@@ -14,14 +14,11 @@ const ProductsTab = () => {
   // Add fund state
   const [selectedProductId, setSelectedProductId] = useState('');
   const [fundCompanyName, setFundCompanyName] = useState('');
-  const [fundCompanySuggestions, setFundCompanySuggestions] = useState([]);
-  const [selectedFundCompanyName, setSelectedFundCompanyName] = useState('');
   const [fundAllocationPercent, setFundAllocationPercent] = useState('');
   const [fundEntryPrice, setFundEntryPrice] = useState('');
 
   useEffect(() => {
     fetchProducts();
-    fetchCompanies();
   }, []);
 
   const fetchProducts = async () => {
@@ -30,15 +27,6 @@ const ProductsTab = () => {
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
-    }
-  };
-
-  const fetchCompanies = async () => {
-    try {
-      const response = await apiService.getCompanies();
-      setFundCompanySuggestions(response.data);
-    } catch (error) {
-      console.error('Error fetching companies:', error);
     }
   };
 
@@ -63,35 +51,22 @@ const ProductsTab = () => {
 
     try {
       await apiService.addFundToProduct(selectedProductId, {
-        companyName: selectedFundCompanyName,
+        companyName: fundCompanyName,
         allocationPercent: parseInt(fundAllocationPercent),
         entryPrice: parseFloat(fundEntryPrice)
       });
       await fetchProducts();
-      setSelectedProductId('');
-      setFundCompanyName('');
-      setSelectedFundCompanyName('');
-      setFundAllocationPercent('');
-      setFundEntryPrice('');
+      resetFundForm();
     } catch (error) {
       console.error('Error adding fund:', error);
     }
   };
 
-  const handleFundCompanyNameChange = (event) => {
-    const searchTerm = event.target.value;
-    setFundCompanyName(searchTerm);
-
-    const matchingCompanies = fundCompanySuggestions.filter((company) =>
-      company.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFundCompanySuggestions(matchingCompanies);
-  };
-
-  const selectFundCompany = (company) => {
-    setSelectedFundCompanyName(company);
-    setFundCompanyName(company);
-    setFundCompanySuggestions([]);
+  const resetFundForm = () => {
+    setSelectedProductId('');
+    setFundCompanyName('');
+    setFundAllocationPercent('');
+    setFundEntryPrice('');
   };
 
   const viewProductDetails = async (id) => {
@@ -106,7 +81,7 @@ const ProductsTab = () => {
 
   return (
     <div className="grid grid-cols-1 gap-6">
-      {/* Create Product */}
+      {/* Create Product Form */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Create Product</h3>
         <form onSubmit={handleCreateProduct} className="space-y-4">
@@ -135,7 +110,7 @@ const ProductsTab = () => {
         </form>
       </div>
 
-      {/* Add Fund to Product */}
+      {/* Add Fund Form */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Add Fund to Product</h3>
         <form onSubmit={handleAddFund} className="space-y-4">
@@ -152,42 +127,16 @@ const ProductsTab = () => {
               </option>
             ))}
           </select>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Company Name"
-              value={fundCompanyName}
-              onChange={handleFundCompanyNameChange}
-              className="w-full p-2 border rounded pr-8"
-              required
-            />
-            {fundCompanySuggestions.length > 0 && (
-              <div className="absolute bg-white border rounded shadow-lg z-10 w-full">
-                {fundCompanySuggestions.map((company, index) => (
-                  <div
-                    key={index}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => selectFundCompany(company)}
-                  >
-                    {company}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <select
-            value={selectedFundCompanyName}
-            onChange={(e) => setSelectedFundCompanyName(e.target.value)}
+          
+          <input
+            type="text"
+            placeholder="Company Name"
+            value={fundCompanyName}
+            onChange={(e) => setFundCompanyName(e.target.value)}
             className="w-full p-2 border rounded"
             required
-          >
-            <option value="">Select Company</option>
-            {fundCompanySuggestions.map((company, index) => (
-              <option key={index} value={company}>
-                {company}
-              </option>
-            ))}
-          </select>
+          />
+
           <input
             type="number"
             placeholder="Allocation Percent"
