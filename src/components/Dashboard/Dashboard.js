@@ -6,6 +6,7 @@ import SubscriptionsTab from './Tabs/SubscriptionsTab';
 import ProductsTab from './Tabs/ProductsTab';
 import BlogsTab from './Tabs/BlogsTab';
 import TopMoversTab from './Tabs/TopMoversTab';
+import CallbackTab from './Tabs/Callback';  // Import the new CallbackTab component
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
@@ -25,6 +26,8 @@ const Dashboard = () => {
         return <BlogsTab />;
       case 'top-movers':
         return <TopMoversTab />;
+      case 'callback':  // Case for the new callback tab
+        return <CallbackTab />;
       default:
         return <SubscriptionsTab />;
     }
@@ -41,7 +44,8 @@ const Dashboard = () => {
               { key: 'subscriptions', label: 'Subscriptions' },
               { key: 'products', label: 'Products' },
               { key: 'blogs', label: 'Blogs' },
-              { key: 'top-movers', label: 'Top Movers' }, // New Tab
+              { key: 'top-movers', label: 'Top Movers' },
+              { key: 'callback', label: 'Callback' },  // New Tab for callback
             ].map(tab => (
               <button
                 key={tab.key}
